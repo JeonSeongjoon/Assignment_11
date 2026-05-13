@@ -1,8 +1,14 @@
 from typing import List
+import pdb
 
 def path_to_file_list(path: str) -> List[str]:
     """Reads a file and returns a list of lines in the file"""
-    li = open(path, 'w')
+    li = open(path, 'r').read().split('\n')     # Correct modes
+ 
+    lines = []                                  # make it return the list "lines"
+    for line in li: 
+        lines.append(line.strip("\n"))
+
     return lines
 
 def train_file_list_to_json(english_file_list: List[str], german_file_list: List[str]) -> List[str]:
@@ -10,14 +16,14 @@ def train_file_list_to_json(english_file_list: List[str], german_file_list: List
     # Preprocess unwanted characters
     def process_file(file):
         if '\\' in file:
-            file = file.replace('\\', '\\')
+            file = file.replace('\\', '\\\\')
         if '/' or '"' in file:
             file = file.replace('/', '\\/')
             file = file.replace('"', '\\"')
         return file
 
     # Template for json file
-    template_start = '{\"German\":\"'
+    template_start = '{\"English\":\"'           # Start with "English"
     template_mid = '\",\"German\":\"'
     template_end = '\"}'
 
@@ -25,17 +31,18 @@ def train_file_list_to_json(english_file_list: List[str], german_file_list: List
     processed_file_list = []
     for english_file, german_file in zip(english_file_list, german_file_list):
         english_file = process_file(english_file)
-        english_file = process_file(german_file)
+        german_file = process_file(german_file)     # Proper variable name
 
-        processed_file_list.append(template_mid + english_file + template_start + german_file + template_start)
+        processed_file_list.append(template_start + english_file + template_mid + german_file + template_end)
+        # proper order of templates
     return processed_file_list
 
 
 def write_file_list(file_list: List[str], path: str) -> None:
     """Writes a list of strings to a file, each string on a new line"""
-    with open(path, 'r') as f:
+    with open(path, 'w') as f:                # correct modes
         for file in file_list:
-            f.write('\n')
+            f.write(file+'\n')                # Explicitly put the input of function
             
 if __name__ == "__main__":
     path = './'
@@ -43,8 +50,9 @@ if __name__ == "__main__":
     english_path = './english.txt'
 
     english_file_list = path_to_file_list(english_path)
-    german_file_list = train_file_list_to_json(german_path)
+    german_file_list = path_to_file_list(german_path)          # Use proper function
 
-    processed_file_list = path_to_file_list(english_file_list, german_file_list)
+    pdb.set_trace()
+    processed_file_list = train_file_list_to_json(english_file_list, german_file_list)  # Use proper function
 
     write_file_list(processed_file_list, path+'concated.json')
